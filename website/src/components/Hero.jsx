@@ -2,7 +2,7 @@ import { Reveal } from './Reveal'
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-4 md:px-8 min-h-[100dvh] flex items-center justify-center pt-24">
+    <section className="relative overflow-hidden px-4 md:px-8 min-h-[100dvh] flex items-center justify-center">
       {/* Ethereal background orbs */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute -top-64 -right-64 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-accent-500/8 to-accent-600/4 blur-3xl" />

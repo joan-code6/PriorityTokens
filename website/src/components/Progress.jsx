@@ -78,7 +78,13 @@ export function Progress() {
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
-            Current status and next delivery phases.
+            <span className="relative inline-block mt-2">
+              <span className="absolute -inset-x-4 -inset-y-2 bg-gradient-to-r from-[#d6f36b]/40 via-[#d6f36b]/20 to-[#d6f36b]/40 blur-2xl -z-10" />
+              <span className="relative inline-block bg-gradient-to-r from-[#d6f36b] to-[#c8e83d] px-4 py-1.5 rounded-lg text-black font-semibold">
+                Current status
+              </span>
+            </span>
+             and next delivery phases.
           </h2>
           <p className="mt-10 text-pretty text-base leading-relaxed text-gray-400 max-w-2xl md:text-lg">
             The project is early and intentionally constrained. The concept is defined, while tokenization, training data generation, and fine-tuning execution are still pending.

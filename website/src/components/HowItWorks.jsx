@@ -32,7 +32,7 @@ export function HowItWorks() {
     <section id="how-it-works" className="px-4 py-32 md:px-8 md:py-40">
       <div className="mx-auto max-w-6xl">
 
-        <Reveal delay={60}>
+        <Reveal>
           <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
             Four steps from markup to{' '}
             <span className="relative inline-block mt-2">
@@ -49,7 +49,6 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <Reveal
               key={step.number}
-              delay={120 + index * 70}
               className={`md:col-span-6 ${index === 0 ? 'lg:col-span-7' : ''} ${index === 1 ? 'lg:col-span-5' : ''} ${index === 2 ? 'lg:col-span-5' : ''} ${index === 3 ? 'lg:col-span-7' : ''}`}
             >
               <article className="group rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-1.5 backdrop-blur-sm transition-all duration-500 hover:border-white/20 hover:from-white/[0.12] hover:to-white/[0.04]">

@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { Problem } from './components/Problem'
 import { Solution } from './components/Solution'
@@ -21,7 +20,6 @@ export default function App() {
       >
         Skip to content
       </a>
-      <Header />
       <main id="main-content">
         <Hero />
         <Problem />
