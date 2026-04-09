@@ -31,11 +31,6 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="px-4 py-32 md:px-8 md:py-40">
       <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <span className="inline-flex rounded-full border border-accent-500/20 bg-accent-500/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-accent-300 backdrop-blur-sm">
-            execution flow
-          </span>
-        </Reveal>
 
         <Reveal delay={60}>
           <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
@@ -61,10 +56,10 @@ export function HowItWorks() {
                 <div className="h-full rounded-[calc(2.5rem-0.375rem)] border border-white/10 bg-gradient-to-br from-[#0d1020] to-[#0a0c14] p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] transition-all duration-500 group-hover:from-[#0f1428] group-hover:to-[#0b0e18]">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-5xl font-bold tracking-[-0.05em] text-accent-500/40 group-hover:text-accent-500/60 transition-all duration-500">{step.number}</p>
+                      <p className="text-5xl font-bold tracking-[-0.05em] text-accent-oklch(71.5% 0.143 215.221) group-hover:text-accent-500/60 transition-all duration-500">{step.number}</p>
                       <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">{step.title}</h3>
                     </div>
-                    <span className="text-2xl text-accent-400/60 group-hover:text-accent-300 transition-all duration-500">{step.icon}</span>
+                    <span className="text-2xl text-accent-300 group-hover:text-accent-400/60 transition-all duration-500">{step.icon}</span>
                   </div>
                   <p className="mt-5 text-base leading-relaxed text-gray-400">{step.description}</p>
                 </div>

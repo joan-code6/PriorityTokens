@@ -42,9 +42,6 @@ export function Implementation() {
     <section id="tech" className="px-4 py-32 md:px-8 md:py-40">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <span className="inline-flex rounded-full border border-accent-500/20 bg-accent-500/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-accent-300 backdrop-blur-sm">
-            technical scope
-          </span>
           <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
             Deliberately small, measurable, and reproducible.
           </h2>
