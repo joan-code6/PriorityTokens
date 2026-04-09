@@ -1,35 +1,57 @@
+import { Reveal } from './Reveal'
+
 export function Hero() {
   return (
-    <section className="min-h-[100dvh] flex items-center justify-center px-6 py-20 bg-gradient-to-b from-white via-white to-gray-50 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="inline-block mb-6 px-3 py-1.5 bg-accent-50 dark:bg-accent-950 border border-accent-200 dark:border-accent-900 rounded-full">
-          <span className="text-xs font-semibold text-accent-700 dark:text-accent-300">Improving LLM Attention</span>
-        </div>
-        
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
-          Make LLMs <span className="text-accent-600">Pay Attention</span> to What Matters
-        </h1>
-        
-        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-          Priority Tokens introduce a simple markup syntax that lets you explicitly signal importance to language models — solving the "lost in the middle" problem with a single lightweight addition.
-        </p>
+    <section className="relative overflow-hidden px-4 md:px-8 min-h-[100dvh] flex items-center justify-center pt-24">
+      {/* Ethereal background orbs */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-64 -right-64 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-accent-500/8 to-accent-600/4 blur-3xl" />
+        <div className="absolute -bottom-32 left-1/4 h-[400px] w-[400px] rounded-full bg-gradient-to-tr from-accent-500/6 to-transparent blur-3xl" />
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="px-8 py-3 bg-accent-600 text-white font-semibold rounded-lg hover:bg-accent-700 transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 active:scale-[0.98]">
-            Learn More
-          </button>
-          <button className="px-8 py-3 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950 active:scale-[0.98]">
-            View Docs
-          </button>
-        </div>
+      <div className="mx-auto w-full max-w-3xl">
+        <div className="flex flex-col">
 
-        {/* Visual demonstration */}
-        <div className="mt-16 bg-gray-900 dark:bg-gray-800 rounded-lg p-6 text-left overflow-hidden border border-gray-800 dark:border-gray-700">
-          <div className="space-y-3 font-mono text-sm">
-            <div className="text-gray-400">&lt;&lt;Priority1&gt;&gt; ... &lt;&lt;PrioEnd&gt;&gt;</div>
-            <div className="text-gray-400">&lt;&lt;Priority5&gt;&gt; ... &lt;&lt;PrioEnd&gt;&gt;</div>
-            <div className="text-accent-400 animate-pulse-subtle">&lt;&lt;Priority10&gt;&gt; ... &lt;&lt;PrioEnd&gt;&gt;</div>
-          </div>
+          {/* Main headline */}
+          <Reveal delay={40} className="flex flex-col">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl 2xl:text-8xl font-semibold leading-[1.1] tracking-[-0.03em] text-white">
+              Make LLMs pay attention to{' '}
+              <span className="relative inline-block mt-3">
+                {/* Soft glow background */}
+                <span className="absolute -inset-x-4 -inset-y-2 bg-gradient-to-r from-[#d6f36b]/40 via-[#d6f36b]/20 to-[#d6f36b]/40 blur-2xl -z-10 animate-pulse-subtle" />
+                {/* Main highlight */}
+                <span className="relative inline-block bg-gradient-to-r from-[#d6f36b] to-[#c8e83d] px-4 py-1.5 rounded-lg text-black font-semibold shadow-lg shadow-[#d6f36b]/30">
+                  what matters
+                </span>
+              </span>
+            </h1>
+          </Reveal>
+
+          {/* Subheading */}
+          <Reveal delay={80} className="mt-10">
+            <p className="text-base md:text-lg text-gray-500 leading-relaxed max-w-[65ch]">
+              Use priority tokens to guide language models toward the information that actually shapes their decisions. Control what matters in long contexts.
+            </p>
+          </Reveal>
+
+          {/* CTA buttons */}
+          <Reveal delay={120} className="mt-12 flex flex-col sm:flex-row gap-4">
+            <a
+              href="#solution"
+              className="group relative inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:shadow-xl hover:shadow-white/20 hover:-translate-y-0.5 active:scale-[0.97]"
+            >
+              Explore solution
+              <span className="ml-3 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/10 transition-all duration-300 group-hover:bg-black/15 group-hover:translate-x-1">
+                <span className="text-sm">↗</span>
+              </span>
+            </a>
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5 backdrop-blur-sm"
+            >
+              How it works
+            </a>
+          </Reveal>
         </div>
       </div>
     </section>

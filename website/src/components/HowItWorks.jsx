@@ -1,49 +1,75 @@
+import { Reveal } from './Reveal'
+
 export function HowItWorks() {
   const steps = [
     {
       number: '01',
       title: 'Mark Your Content',
-      description: 'Wrap important text with priority token pairs — from Priority1 (low) to Priority10 (highest).',
+      description: 'Wrap important text with priority token pairs — from Priority1 (low) to Priority10 (highest). Lightweight markup, zero architecture changes.',
+      icon: '▶',
     },
     {
       number: '02',
-      title: 'Fine-Tuned Attention',
-      description: 'The model is trained to recognize these tokens and adjust its behavior accordingly during inference.',
+      title: 'Model Learns Priority',
+      description: 'Fine-tune with QLoRA on a GPU. The model learns to recognize these tokens and upweight their importance in the attention computation.',
+      icon: '⚙',
     },
     {
       number: '03',
-      title: 'Better Outcomes',
-      description: 'Instructions are followed more reliably and context is recalled more accurately.',
+      title: 'Better Recall & Following',
+      description: 'Priority10 facts buried deep now get retrieved. Instructions marked high-priority are followed more reliably, even in long contexts.',
+      icon: '✓',
     },
     {
       number: '04',
-      title: 'Scale & Adapt',
-      description: 'Use the full 1–10 priority gradient or the binary case that best suits your needs.',
+      title: 'Evaluate & Scale',
+      description: 'Validate on your north star eval. If successful, expand to full 1–10 gradient and test on larger models. Deploy with confidence.',
+      icon: '→',
     },
   ]
 
   return (
-    <section id="how-it-works" className="py-20 px-6 bg-white dark:bg-gray-950">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">How It Works</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Four simple steps to better LLM attention.</p>
-        </div>
+    <section id="how-it-works" className="px-4 py-32 md:px-8 md:py-40">
+      <div className="mx-auto max-w-6xl">
+        <Reveal>
+          <span className="inline-flex rounded-full border border-accent-500/20 bg-accent-500/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-accent-300 backdrop-blur-sm">
+            execution flow
+          </span>
+        </Reveal>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Reveal delay={60}>
+          <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
+            Four steps from markup to{' '}
+            <span className="relative inline-block mt-2">
+              <span className="absolute -inset-x-4 -inset-y-2 bg-gradient-to-r from-[#d6f36b]/40 via-[#d6f36b]/20 to-[#d6f36b]/40 blur-2xl -z-10" />
+              <span className="relative inline-block bg-gradient-to-r from-[#d6f36b] to-[#c8e83d] px-4 py-1.5 rounded-lg text-black font-semibold">
+                better responses
+              </span>
+            </span>
+            .
+          </h2>
+        </Reveal>
+
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-12">
           {steps.map((step, index) => (
-            <div key={index} className="flex flex-col">
-              <div className="mb-6">
-                <span className="text-5xl font-bold text-accent-200">{step.number}</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{step.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{step.description}</p>
-              </div>
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute right-0 top-1/2 w-6 h-0.5 bg-gradient-to-r from-accent-300 to-transparent" />
-              )}
-            </div>
+            <Reveal
+              key={step.number}
+              delay={120 + index * 70}
+              className={`md:col-span-6 ${index === 0 ? 'lg:col-span-7' : ''} ${index === 1 ? 'lg:col-span-5' : ''} ${index === 2 ? 'lg:col-span-5' : ''} ${index === 3 ? 'lg:col-span-7' : ''}`}
+            >
+              <article className="group rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-1.5 backdrop-blur-sm transition-all duration-500 hover:border-white/20 hover:from-white/[0.12] hover:to-white/[0.04]">
+                <div className="h-full rounded-[calc(2.5rem-0.375rem)] border border-white/10 bg-gradient-to-br from-[#0d1020] to-[#0a0c14] p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] transition-all duration-500 group-hover:from-[#0f1428] group-hover:to-[#0b0e18]">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-5xl font-bold tracking-[-0.05em] text-accent-500/40 group-hover:text-accent-500/60 transition-all duration-500">{step.number}</p>
+                      <h3 className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-white">{step.title}</h3>
+                    </div>
+                    <span className="text-2xl text-accent-400/60 group-hover:text-accent-300 transition-all duration-500">{step.icon}</span>
+                  </div>
+                  <p className="mt-5 text-base leading-relaxed text-gray-400">{step.description}</p>
+                </div>
+              </article>
+            </Reveal>
           ))}
         </div>
       </div>

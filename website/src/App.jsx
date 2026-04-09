@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { Problem } from './components/Problem'
@@ -9,29 +9,20 @@ import { Progress } from './components/Progress'
 import { Footer } from './components/Footer'
 
 export default function App() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark' || 
-             (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    }
-    return false
-  })
-
   useEffect(() => {
-    const html = document.documentElement
-    if (isDark) {
-      html.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      html.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  }, [isDark])
+    document.documentElement.classList.add('dark')
+  }, [])
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      <Header isDark={isDark} setIsDark={setIsDark} />
-      <main>
+    <div className="min-h-[100dvh] bg-[#050505] text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-40 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-black"
+      >
+        Skip to content
+      </a>
+      <Header />
+      <main id="main-content">
         <Hero />
         <Problem />
         <Solution />

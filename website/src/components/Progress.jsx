@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, AlertCircle } from 'lucide-react'
+import { Reveal } from './Reveal'
 
 export function Progress() {
   const phases = [
@@ -52,11 +52,11 @@ export function Progress() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'done':
-        return 'text-green-500'
+        return 'text-[#d6f36b]'
       case 'in-progress':
-        return 'text-accent-500'
+        return 'text-[#f7e38a]'
       case 'not-started':
-        return 'text-gray-400 dark:text-gray-600'
+        return 'text-white/40'
       default:
         return ''
     }
@@ -65,93 +65,81 @@ export function Progress() {
   const getStatusBg = (status) => {
     switch (status) {
       case 'in-progress':
-        return 'bg-accent-50 dark:bg-accent-950 border-accent-200 dark:border-accent-900'
+        return 'border-[#f7e38a]/35 bg-[#f7e38a]/10'
       case 'not-started':
-        return 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800'
+        return 'border-white/10 bg-black/25'
       default:
-        return 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+        return 'border-[#d6f36b]/30 bg-[#d6f36b]/10'
     }
   }
 
   return (
-    <section id="progress" className="py-20 px-6 bg-white dark:bg-gray-950">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-16">
-          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-full">
-            <AlertCircle className="w-4 h-4 text-amber-700 dark:text-amber-300" strokeWidth={2} />
-            <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">Early Stage</span>
-          </div>
-          
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Project Progress</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
-            This is a hobby project still in the concept phase. Currently, only the problem statement and technical vision are complete. Nothing has been built yet.
+    <section id="progress" className="px-4 py-32 md:px-8 md:py-40">
+      <div className="mx-auto max-w-6xl">
+        <Reveal>
+          <span className="inline-flex rounded-full border border-accent-500/20 bg-accent-500/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-accent-300 backdrop-blur-sm">
+            roadmap
+          </span>
+          <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
+            Current status and next delivery phases.
+          </h2>
+          <p className="mt-10 text-pretty text-base leading-relaxed text-gray-400 max-w-2xl md:text-lg">
+            The project is early and intentionally constrained. The concept is defined, while tokenization, training data generation, and fine-tuning execution are still pending.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="space-y-6">
+        <Reveal delay={120} className="mt-12 space-y-6">
           {phases.map((phase, index) => (
             <div
               key={index}
-              className={`border rounded-lg p-8 transition-colors ${getStatusBg(phase.status)}`}
+              className={`rounded-[2.5rem] border p-1.5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${getStatusBg(phase.status)}`}
             >
-              <div className="flex items-start gap-4 mb-6">
-                <div className={`flex-shrink-0 mt-1.5 ${getStatusColor(phase.status)}`}>
-                  {phase.status === 'in-progress' ? (
-                    <Circle className="w-6 h-6 fill-current" strokeWidth={2} />
-                  ) : phase.status === 'done' ? (
-                    <CheckCircle2 className="w-6 h-6" strokeWidth={2} />
-                  ) : (
-                    <Circle className="w-6 h-6" strokeWidth={2} />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
-                    {phase.phase}
-                  </h3>
-                  <p className={`text-sm font-medium ${
-                    phase.status === 'in-progress' 
-                      ? 'text-accent-600 dark:text-accent-400' 
-                      : phase.status === 'done'
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-gray-500 dark:text-gray-500'
-                  }`}>
-                    {phase.status === 'in-progress' 
-                      ? '🚧 In Progress'
-                      : phase.status === 'done' 
-                      ? '✓ Complete' 
-                      : '○ Not Started'}
-                  </p>
-                </div>
-              </div>
-
-              <ul className="space-y-3">
-                {phase.items.map((item, itemIndex) => (
-                  <li key={itemIndex} className="flex items-center gap-3">
-                    {item.done ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" strokeWidth={2} />
-                    ) : (
-                      <Circle className="w-5 h-5 text-gray-400 dark:text-gray-600 flex-shrink-0" strokeWidth={2} />
-                    )}
-                    <span className={`text-base ${
-                      item.done
-                        ? 'text-gray-600 dark:text-gray-400 line-through'
-                        : 'text-gray-700 dark:text-gray-300'
+              <article className="rounded-[calc(2.5rem-0.375rem)] border border-white/10 bg-[#0a0b12] p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <div className="mb-6 flex items-start gap-4">
+                  <div className={`mt-1.5 h-3 w-3 flex-shrink-0 rounded-full ${getStatusColor(phase.status)}`} />
+                  <div>
+                    <h3 className="text-2xl font-semibold tracking-[-0.02em] text-white">
+                      {phase.phase}
+                    </h3>
+                    <p className={`mt-1 text-sm font-medium ${
+                      phase.status === 'in-progress'
+                        ? 'text-[#f7e38a]'
+                        : phase.status === 'done'
+                          ? 'text-[#d6f36b]'
+                          : 'text-white/45'
                     }`}>
-                      {item.name}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                      {phase.status === 'in-progress'
+                        ? 'In progress'
+                        : phase.status === 'done'
+                          ? 'Complete'
+                          : 'Not started'}
+                    </p>
+                  </div>
+                </div>
+
+                <ul className="space-y-3">
+                  {phase.items.map((item, itemIndex) => (
+                    <li key={itemIndex} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3">
+                      <span className={`h-2.5 w-2.5 rounded-full ${item.done ? 'bg-[#d6f36b]' : 'bg-white/25'}`} />
+                      <span className={`text-sm md:text-base ${item.done ? 'text-white/45 line-through' : 'text-white/75'}`}>
+                        {item.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
             </div>
           ))}
-        </div>
 
-        <div className="mt-12 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-900 rounded-lg p-6">
-          <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Current Status</h4>
-          <p className="text-blue-800 dark:text-blue-300">
-            The concept and technical approach are written. The project is in early planning stages with no code or training begun yet. Budget and timeline are provisional pending research and GPU availability.
-          </p>
-        </div>
+          <div className="mt-12 rounded-[2.5rem] border border-[#d6f36b]/40 bg-gradient-to-br from-[#d6f36b]/15 to-[#d6f36b]/5 p-1.5 backdrop-blur-sm">
+            <div className="rounded-[calc(2.5rem-0.375rem)] border border-[#d6f36b]/30 bg-gradient-to-br from-[#0f1408] to-[#0a0d04] p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+              <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-[#d6f36b]">Current status</h4>
+              <p className="mt-3 text-sm leading-relaxed text-[#e9f8b8] md:text-base">
+                Concept and technical framing are complete. The active next step is finalizing markup specs and setting up the first reproducible QLoRA training run.
+              </p>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   )

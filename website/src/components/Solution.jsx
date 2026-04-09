@@ -1,56 +1,59 @@
-import { Lightbulb } from 'lucide-react'
+import { Reveal } from './Reveal'
 
 export function Solution() {
   return (
-    <section id="solution" className="py-20 px-6 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 order-2 md:order-1">
-            <div className="space-y-6 font-mono text-sm">
-              <div>
-                <p className="text-gray-400 dark:text-gray-500 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Low Priority</p>
-                <p className="bg-gray-50 dark:bg-gray-900 rounded px-4 py-2 text-gray-600 dark:text-gray-400">&lt;&lt;Priority1&gt;&gt;This is less important&lt;&lt;PrioEnd&gt;&gt;</p>
-              </div>
-              <div>
-                <p className="text-gray-400 dark:text-gray-500 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Moderate Priority</p>
-                <p className="bg-gray-50 dark:bg-gray-900 rounded px-4 py-2 text-gray-600 dark:text-gray-400">&lt;&lt;Priority5&gt;&gt;This is moderately important&lt;&lt;PrioEnd&gt;&gt;</p>
-              </div>
-              <div>
-                <p className="text-gray-400 dark:text-gray-500 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Highest Priority</p>
-                <p className="bg-accent-50 dark:bg-accent-950 rounded px-4 py-2 text-accent-700 dark:text-accent-300 border border-accent-200 dark:border-accent-900">&lt;&lt;Priority10&gt;&gt;This is critical&lt;&lt;PrioEnd&gt;&gt;</p>
-              </div>
-            </div>
-          </div>
+    <section id="solution" className="px-4 py-32 md:px-8 md:py-40">
+      <div className="mx-auto max-w-6xl">
+        <Reveal>
+          <span className="inline-flex rounded-full border border-accent-500/20 bg-accent-500/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-accent-300 backdrop-blur-sm">
+            solution model
+          </span>
+          <h2 className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold leading-[1.08] tracking-[-0.03em] text-white">
+            Priority Tokens make instruction weight explicit.
+          </h2>
+        </Reveal>
 
-          <div className="order-1 md:order-2">
-            <div className="flex items-start gap-4 mb-8">
-              <div className="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <Lightbulb className="w-6 h-6 text-accent-600" strokeWidth={2} />
+        <Reveal delay={130} className="mt-16">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+            <article className="md:col-span-5">
+              <div className="rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-1.5 backdrop-blur-sm">
+                <div className="rounded-[calc(2.5rem-0.375rem)] border border-white/10 bg-gradient-to-br from-[#0d1020] to-[#0a0c14] p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/45">signal gradient</p>
+                  <div className="mt-5 space-y-4 font-mono text-sm">
+                    <div className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white/60">&lt;&lt;Priority1&gt;&gt;Optional context&lt;&lt;PrioEnd&gt;&gt;</div>
+                    <div className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white/75">&lt;&lt;Priority5&gt;&gt;Important detail&lt;&lt;PrioEnd&gt;&gt;</div>
+                    <div className="rounded-2xl border border-[#d6f36b]/45 bg-[#d6f36b]/10 px-4 py-3 text-[#d6f36b]">&lt;&lt;Priority10&gt;&gt;Non-negotiable instruction&lt;&lt;PrioEnd&gt;&gt;</div>
+                  </div>
+                </div>
               </div>
-              <div>
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Priority Tokens</h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                  A lightweight markup syntax that lets you explicitly signal how much weight the model should give to different parts of your text.
-                </p>
-              </div>
-            </div>
+            </article>
 
-            <div className="space-y-4">
-              <div className="border-l-4 border-accent-600 pl-4">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Instruction Following</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">High-priority instructions are followed more reliably, even when buried in long documents.</p>
+            <article className="md:col-span-7">
+              <div className="rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-1.5 backdrop-blur-sm">
+                <div className="rounded-[calc(2.5rem-0.375rem)] border border-white/10 bg-gradient-to-br from-[#0d1020] to-[#0a0c14] p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] md:p-10">
+                  <p className="text-pretty text-base leading-relaxed text-gray-400 md:text-lg">
+                    Users declare priority directly in the prompt, and fine-tuning teaches the model to respond differently to those tokens without changing model architecture.
+                  </p>
+
+                  <div className="mt-8 grid gap-5 md:grid-cols-3">
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                      <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90">Instruction following</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-white/65">A Priority10 instruction should be followed more reliably than a Priority1 one, even deep in long context.</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                      <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90">Recall accuracy</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-white/65">Facts wrapped in high-priority tokens should be retained and referenced more accurately in outputs.</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                      <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-white/90">Adoption speed</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-white/65">Lightweight prompt markup with QLoRA fine-tuning, not full retraining from scratch.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="border-l-4 border-accent-600 pl-4">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Recall Accuracy</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Important facts are retained and referenced with higher accuracy in model outputs.</p>
-              </div>
-              <div className="border-l-4 border-accent-600 pl-4">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">No Architecture Changes</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Learned behavior through fine-tuning, similar to how models learned `[INST]` tags.</p>
-              </div>
-            </div>
+            </article>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   )
