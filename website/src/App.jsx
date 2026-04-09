@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Hero } from './components/Hero'
 import { Problem } from './components/Problem'
 import { Solution } from './components/Solution'
@@ -9,30 +9,19 @@ import { Progress } from './components/Progress'
 import { Footer } from './components/Footer'
 
 export default function App() {
-  const [isNoticeOpen, setIsNoticeOpen] = useState(true)
-
   useEffect(() => {
     document.documentElement.classList.add('dark')
   }, [])
 
-  useEffect(() => {
-    if (!isNoticeOpen) {
-      return undefined
-    }
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-
-    return () => {
-      document.body.style.overflow = previousOverflow
-    }
-  }, [isNoticeOpen])
-
-  function handleDismissNotice() {
-    setIsNoticeOpen(false)
-  }
-
   return (
+    <div className="min-h-[100dvh] bg-[#050505] text-white">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-40 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-black"
+      >
+        Skip to content
+      </a>
+      <main id="main-content">
         <Hero />
         <Problem />
         <RelatedWork />
