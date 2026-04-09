@@ -4,6 +4,7 @@ import { Problem } from './components/Problem'
 import { Solution } from './components/Solution'
 import { HowItWorks } from './components/HowItWorks'
 import { Implementation } from './components/Implementation'
+import { RelatedWork } from './components/RelatedWork'
 import { Progress } from './components/Progress'
 import { Footer } from './components/Footer'
 
@@ -23,6 +24,7 @@ export default function App() {
       <main id="main-content">
         <Hero />
         <Problem />
+        <RelatedWork />
         <Solution />
         <HowItWorks />
         <Implementation />

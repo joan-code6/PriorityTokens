@@ -41,11 +41,11 @@ export function Solution() {
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-white/50 font-semibold mb-6">How it works</p>
                 <p className="text-base leading-relaxed text-gray-400 mb-8">
-                  You declare priority directly in the prompt. Fine-tuning teaches the model to recognize these tokens and adjust attention weights accordingly—without changing the model architecture.
+                  You declare priority directly in the prompt. Fine-tuning teaches the model to recognize these tokens and respond to them with appropriate priority—without changing the model architecture.
                 </p>
                 <div className="space-y-5">
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-white/70 mb-2">No retraining needed</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-white/70 mb-2">No architecture changes</h4>
                     <p className="text-sm text-gray-400">QLoRA fine-tuning only. Lightweight, fast, and cheap to deploy.</p>
                   </div>
                   <div>

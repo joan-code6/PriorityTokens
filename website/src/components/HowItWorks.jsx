@@ -11,7 +11,7 @@ export function HowItWorks() {
     {
       number: '02',
       title: 'Model Learns Priority',
-      description: 'Fine-tune with QLoRA on a GPU. The model learns to recognize these tokens and upweight their importance in the attention computation.',
+      description: 'Fine-tune with QLoRA on a GPU. The model learns to recognize these tokens and respond to them with appropriate priority.',
       icon: '⚙',
     },
     {
