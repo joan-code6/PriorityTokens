@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Hero } from './components/Hero'
 import { Problem } from './components/Problem'
 import { Solution } from './components/Solution'
+import { ConceptPaper } from './components/ConceptPaper'
 import { HowItWorks } from './components/HowItWorks'
 import { Implementation } from './components/Implementation'
 import { RelatedWork } from './components/RelatedWork'
@@ -26,6 +27,7 @@ export default function App() {
         <Problem />
         <RelatedWork />
         <Solution />
+        <ConceptPaper />
         <HowItWorks />
         <Implementation />
         <Progress />
