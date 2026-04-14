@@ -13,14 +13,15 @@ export function Reveal({ as: Tag = 'div', className = '', delay = 0, children, .
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        // Reveal when entering the viewport OR when already scrolled past (fast scroll)
+        if (entry.isIntersecting || entry.boundingClientRect.bottom <= 0) {
           setIsVisible(true)
           observer.unobserve(entry.target)
         }
       },
       {
-        threshold: 0.2,
-        rootMargin: '0px 0px -10% 0px',
+        threshold: 0,
+        rootMargin: '0px 0px -5% 0px',
       },
     )
 
