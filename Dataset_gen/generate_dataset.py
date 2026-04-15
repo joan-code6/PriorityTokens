@@ -16,14 +16,20 @@ import re
 import sys
 import threading
 import time
+import urllib.error
+import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
 import dotenv
-from openrouter import OpenRouter
 from tqdm import tqdm
 from transformers import AutoTokenizer
+
+try:
+    from openrouter import OpenRouter
+except Exception:  # noqa: BLE001
+    OpenRouter = None  # type: ignore[assignment]
 
 MODEL_NAME = "qwen/qwen3-32b"
 CLOSE_TAG = "<<PrioEnd>>"
@@ -119,30 +125,76 @@ class ClaudeClient:
     def __init__(self, model: str = MODEL_NAME) -> None:
         self.model = model
         if os.getenv("PROVIDER") == "hai":
-            custom_provider = "https://ai.hackclub.com/proxy/v1"
+            self.server_url = "https://ai.hackclub.com/proxy/v1"
         else:
-            custom_provider = "https://openrouter.ai/api/v1"
+            self.server_url = "https://openrouter.ai/api/v1"
 
-        self.client = OpenRouter(
-            api_key=os.getenv("API_KEY"),
-            server_url=custom_provider,
+        self.api_key = os.getenv("API_KEY")
+        if not self.api_key:
+            raise RuntimeError("Missing API_KEY in environment")
+
+        self.client: Any | None = None
+        if OpenRouter is not None:
+            self.client = OpenRouter(
+                api_key=self.api_key,
+                server_url=self.server_url,
+            )
+
+    def _generate_text_http(self, prompt: str, max_tokens: int) -> str:
+        payload = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        body = json.dumps(payload).encode("utf-8")
+        request = urllib.request.Request(
+            url=f"{self.server_url}/chat/completions",
+            data=body,
+            method="POST",
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            },
         )
+
+        with urllib.request.urlopen(request, timeout=120) as response:
+            raw = response.read().decode("utf-8")
+
+        parsed = json.loads(raw)
+        content = parsed["choices"][0]["message"]["content"]
+        if isinstance(content, list):
+            text_parts = []
+            for item in content:
+                if isinstance(item, dict) and "text" in item:
+                    text_parts.append(str(item["text"]))
+                else:
+                    text_parts.append(str(item))
+            text = "\n".join(text_parts).strip()
+        else:
+            text = str(content).strip()
+
+        if not text:
+            raise RuntimeError("Empty text from HTTP response")
+        return text
 
     def generate_text(self, prompt: str, max_tokens: int = 1024) -> str:
         delay_seconds = 2
         for attempt in range(5):
             try:
-                response = self.client.chat.send(
-                    model=self.model,
-                    max_tokens=max_tokens,
-                    messages=[{"role": "user", "content": prompt}],
-                )
+                if self.client is not None:
+                    response = self.client.chat.send(
+                        model=self.model,
+                        max_tokens=max_tokens,
+                        messages=[{"role": "user", "content": prompt}],
+                    )
 
-                content = response.choices[0].message.content
-                if isinstance(content, list):
-                    text = "\n".join(str(item) for item in content).strip()
+                    content = response.choices[0].message.content
+                    if isinstance(content, list):
+                        text = "\n".join(str(item) for item in content).strip()
+                    else:
+                        text = str(content).strip()
                 else:
-                    text = str(content).strip()
+                    text = self._generate_text_http(prompt=prompt, max_tokens=max_tokens)
                 if not text:
                     raise RuntimeError("Empty text from Claude response")
                 return text

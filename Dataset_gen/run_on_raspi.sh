@@ -38,7 +38,17 @@ nohup python generate_dataset.py \
   --concurrency "${CONCURRENCY}" \
   >> run.log 2>&1 < /dev/null &
 
-echo $! > run.pid
+PID="$!"
+echo "${PID}" > run.pid
+
+# Detect immediate startup failures so the script does not report false success.
+sleep 1
+if ! kill -0 "${PID}" 2>/dev/null; then
+  echo "Generator failed to start. Last log lines:"
+  tail -n 30 run.log || true
+  rm -f run.pid
+  exit 1
+fi
 
 echo "Started generate_dataset.py in background"
 echo "PID: $(cat run.pid)"
