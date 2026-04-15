@@ -1,0 +1,13 @@
+{
+  "messages": [
+    {"role": "user", "content": "<document with tags>\n\nQuestion: ..."},
+    {"role": "assistant", "content": "..."}
+  ],
+  "metadata": {
+    "type": "contrastive",
+    "p10_position": 2841,
+    "p5_position": 891,
+    "doc_length": 5200,
+    "pair_id": "abc123"
+  }
+}

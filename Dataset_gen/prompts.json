@@ -1,0 +1,28 @@
+{
+    
+    "contradicting": [
+        {
+            "task_description": "Create a fiction question with two contradicting answers which both could be possible."
+
+        }
+    ],
+    "Topics": [
+        {
+            "Jungle_research": "Youre Topic is Jungle research. Write everything Jungle themed.",
+            "car_engineering": "Youre Topic is car engineering. Write everything car engineering themed.",
+            "space_exploration": "Youre Topic is space exploration. Write everything space exploration themed.",
+            "medieval_history": "Youre Topic is medieval history. Write everything medieval history themed.",
+            "oceanography": "Youre Topic is oceanography. Write everything oceanography themed.",
+            "quantum_physics": "Youre Topic is quantum physics. Write everything quantum physics themed.",
+            "artificial_intelligence": "Youre Topic is artificial intelligence. Write everything artificial intelligence themed.",
+            "ancient_civilizations": "Youre Topic is ancient civilizations. Write everything ancient civilizations themed.",
+            "climate_change": "Youre Topic is climate change. Write everything climate change themed.",
+            "genetic_engineering": "Youre Topic is genetic engineering. Write everything genetic engineering themed.",
+            "history_of_computing": "Youre Topic is history of computing. Write everything history of computing themed.",
+            "philosophy_of_mind": "Youre Topic is philosophy of mind. Write everything philosophy of mind themed.",
+            "renewable_energy": "Youre Topic is renewable energy. Write everything renewable energy themed.",
+            "cybersecurity": "Youre Topic is cybersecurity. Write everything cybersecurity themed."
+
+        }
+    ]
+}

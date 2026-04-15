@@ -1,0 +1,4 @@
+openrouter
+python-dotenv
+transformers
+tqdm
