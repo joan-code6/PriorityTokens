@@ -8,11 +8,13 @@ metadata object used for offline analysis.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import os
 import random
 import re
 import sys
+import threading
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -64,6 +66,19 @@ REQUIRED_METADATA_FIELDS = {
 }
 
 dotenv.load_dotenv()
+
+_THREAD_LOCAL = threading.local()
+_TOKENIZER_LOCK = threading.Lock()
+_SHARED_TOKENIZER: AutoTokenizer | None = None
+
+
+def get_shared_tokenizer() -> AutoTokenizer:
+    global _SHARED_TOKENIZER
+    if _SHARED_TOKENIZER is None:
+        with _TOKENIZER_LOCK:
+            if _SHARED_TOKENIZER is None:
+                _SHARED_TOKENIZER = AutoTokenizer.from_pretrained("Qwen/Qwen3-8B")
+    return _SHARED_TOKENIZER
 
 
 def count_tokens(tokenizer: AutoTokenizer, text: str) -> int:
@@ -157,14 +172,14 @@ class ClaudeClient:
 
 
 class DatasetGenerator:
-    def __init__(self, seed: int) -> None:
+    def __init__(self, seed: int, tokenizer: AutoTokenizer | None = None) -> None:
         self.rng = random.Random(seed)
-        self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-8B")
+        self.tokenizer = tokenizer if tokenizer is not None else get_shared_tokenizer()
         self.claude = ClaudeClient(model=MODEL_NAME)
 
     def _domain_for(self, domain_text: str) -> str:
         return DOMAIN_TO_METADATA.get(domain_text, "science")
-    
+
 
     def _tag(self, tag: str, text: str) -> str:
         clean = text.replace("\n", " ").strip()
@@ -574,6 +589,114 @@ class DatasetGenerator:
         }
 
 
+def _seed_for_index(base_seed: int, index: int) -> int:
+    # Derive a deterministic per-example seed so concurrent execution stays reproducible.
+    return (base_seed * 1_000_003 + index * 9_973) & 0xFFFFFFFF
+
+
+def _get_worker_generator() -> DatasetGenerator:
+    generator = getattr(_THREAD_LOCAL, "generator", None)
+    if generator is None:
+        generator = DatasetGenerator(seed=0, tokenizer=get_shared_tokenizer())
+        _THREAD_LOCAL.generator = generator
+    return generator
+
+
+def _build_item_with_retries(
+    *,
+    local_idx: int,
+    spec: dict[str, Any],
+    base_seed: int,
+) -> tuple[int, dict[str, Any], str | None]:
+    example_type = spec["type"]
+    pair_id = spec["pair_id"]
+    variant = spec["variant"]
+    domain_raw = spec["domain_raw"]
+
+    generator = _get_worker_generator()
+    generator.rng.seed(_seed_for_index(base_seed, local_idx))
+
+    item: dict[str, Any] | None = None
+    last_error: Exception | None = None
+
+    for _ in range(3):
+        try:
+            if example_type == "contrastive":
+                item = generator.build_contrastive_example(
+                    domain=domain_raw,
+                    pair_id=pair_id,
+                    variant=variant,
+                )
+            elif example_type == "positive":
+                item = generator.build_positive_example(domain=domain_raw)
+            elif example_type == "adversarial":
+                item = generator.build_adversarial_example(domain=domain_raw)
+            elif example_type == "instruction":
+                item = generator.build_instruction_example(domain=domain_raw)
+            else:
+                raise RuntimeError(f"Unknown example type: {example_type}")
+            break
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+
+    warning: str | None = None
+    if item is None:
+        warning = (
+            "[warn] API-driven assembly failed for "
+            f"index={local_idx}, type={example_type}: {last_error}. Using fallback."
+        )
+        item = generator.build_fallback_example(
+            example_type=example_type,
+            domain=domain_raw,
+            pair_id=pair_id,
+            variant=variant,
+        )
+
+    return local_idx, item, warning
+
+
+async def _generate_pending_examples(
+    *,
+    output_path: Path,
+    pending_plan: list[dict[str, Any]],
+    completed: int,
+    total: int,
+    seed: int,
+    concurrency: int,
+) -> None:
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def run_one(local_idx: int, spec: dict[str, Any]) -> tuple[int, dict[str, Any], str | None]:
+        async with semaphore:
+            return await asyncio.to_thread(
+                _build_item_with_retries,
+                local_idx=local_idx,
+                spec=spec,
+                base_seed=seed,
+            )
+
+    indexed_pending = list(enumerate(pending_plan, start=completed))
+    tasks = [asyncio.create_task(run_one(local_idx, spec)) for local_idx, spec in indexed_pending]
+
+    progress = tqdm(total=total, initial=completed, desc="Generating examples", unit="example")
+    buffered: dict[int, dict[str, Any]] = {}
+    next_to_write = completed
+
+    try:
+        for finished in asyncio.as_completed(tasks):
+            local_idx, item, warning = await finished
+            if warning:
+                print(warning, file=sys.stderr)
+
+            buffered[local_idx] = item
+            while next_to_write in buffered:
+                append_jsonl(output_path, buffered.pop(next_to_write))
+                progress.update(1)
+                next_to_write += 1
+    finally:
+        progress.close()
+
+
 def compute_target_counts(total: int) -> dict[str, int]:
     if total <= 0:
         raise ValueError("--count must be > 0")
@@ -758,11 +881,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", type=str, default="dataset.jsonl", help="Output JSONL path")
     parser.add_argument("--count", type=int, default=1500, help="Total examples to generate")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=4,
+        help="Number of concurrent example generation workers",
+    )
     return parser.parse_args()
 
 
-def main() -> int:
-    args = parse_args()
+async def run(args: argparse.Namespace) -> int:
     output_path = Path(args.output)
 
     try:
@@ -779,61 +907,28 @@ def main() -> int:
         )
         return 2
 
-    generator = DatasetGenerator(seed=args.seed)
-
     pending_plan = plan[completed:]
-    progress = tqdm(total=args.count, initial=completed, desc="Generating examples", unit="example")
 
-    for local_idx, spec in enumerate(pending_plan, start=completed):
-        example_type = spec["type"]
-        pair_id = spec["pair_id"]
-        variant = spec["variant"]
-        domain_raw = spec["domain_raw"]
-
-        item: dict[str, Any] | None = None
-        last_error: Exception | None = None
-
-        for _ in range(3):
-            try:
-                if example_type == "contrastive":
-                    item = generator.build_contrastive_example(
-                        domain=domain_raw,
-                        pair_id=pair_id,
-                        variant=variant,
-                    )
-                elif example_type == "positive":
-                    item = generator.build_positive_example(domain=domain_raw)
-                elif example_type == "adversarial":
-                    item = generator.build_adversarial_example(domain=domain_raw)
-                elif example_type == "instruction":
-                    item = generator.build_instruction_example(domain=domain_raw)
-                else:
-                    raise RuntimeError(f"Unknown example type: {example_type}")
-                break
-            except Exception as exc:  # noqa: BLE001
-                last_error = exc
-
-        if item is None:
-            print(
-                f"[warn] API-driven assembly failed for index={local_idx}, type={example_type}: {last_error}. Using fallback.",
-                file=sys.stderr,
-            )
-            item = generator.build_fallback_example(
-                example_type=example_type,
-                domain=domain_raw,
-                pair_id=pair_id,
-                variant=variant,
-            )
-
-        append_jsonl(output_path, item)
-        progress.update(1)
-
-    progress.close()
+    if pending_plan:
+        concurrency = max(1, args.concurrency)
+        await _generate_pending_examples(
+            output_path=output_path,
+            pending_plan=pending_plan,
+            completed=completed,
+            total=args.count,
+            seed=args.seed,
+            concurrency=concurrency,
+        )
 
     report = validate_dataset(str(output_path))
     print(json.dumps(report, indent=2, ensure_ascii=False))
 
     return 0
+
+
+def main() -> int:
+    args = parse_args()
+    return asyncio.run(run(args))
 
 
 if __name__ == "__main__":
