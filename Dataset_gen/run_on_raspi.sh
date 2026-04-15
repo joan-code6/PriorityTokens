@@ -8,10 +8,27 @@ COUNT="${COUNT:-1500}"
 SEED="${SEED:-42}"
 CONCURRENCY="${CONCURRENCY:-8}"
 OUTPUT="${OUTPUT:-dataset.jsonl}"
-PYTHON_CMD="${PYTHON_CMD:-python3}"
+PYTHON_CMD="${PYTHON_CMD:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
+
+if [[ -z "${PYTHON_CMD}" ]]; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_CMD="python3"
+  elif command -v python >/dev/null 2>&1; then
+    PYTHON_CMD="python"
+  else
+    echo "No Python interpreter found (tried: python3, python)."
+    echo "Install Python 3 + venv, then rerun."
+    exit 1
+  fi
+fi
+
+if ! command -v "${PYTHON_CMD}" >/dev/null 2>&1; then
+  echo "Configured interpreter '${PYTHON_CMD}' not found in PATH."
+  exit 1
+fi
 
 if [[ -f run.pid ]]; then
   OLD_PID="$(cat run.pid || true)"
