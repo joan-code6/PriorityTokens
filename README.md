@@ -86,3 +86,29 @@ measured on how often each gets it right.
 - No full retraining from scratch — QLoRA fine-tuning only
 - Success criterion: a measurable accuracy improvement on the north star eval,
   not a production-ready model
+
+---
+
+## Local Chat With A Trained Adapter
+
+After training, you can chat with your adapter locally:
+
+```powershell
+.\.venv311\Scripts\python chat_adapter.py `
+  --model-name Qwen/Qwen2.5-1.5B-Instruct `
+  --adapter-path artifacts\qwen25-1_5b-prioritytokens-test
+```
+
+CLI commands:
+
+- `/reset` clears chat history
+- `/exit` or `/quit` exits
+
+Optional simple desktop GUI:
+
+```powershell
+.\.venv311\Scripts\python chat_adapter.py `
+  --model-name Qwen/Qwen2.5-1.5B-Instruct `
+  --adapter-path artifacts\qwen25-1_5b-prioritytokens-test `
+  --gui
+```
