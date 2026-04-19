@@ -1,0 +1,20 @@
+{"case_id":"reg-001","question":"What is the capital of France?","answer":"Paris","answer_aliases":["paris, france"]}
+{"case_id":"reg-002","question":"Which planet is known as the Red Planet?","answer":"Mars","answer_aliases":[]}
+{"case_id":"reg-003","question":"Who wrote the play Hamlet?","answer":"William Shakespeare","answer_aliases":["shakespeare"]}
+{"case_id":"reg-004","question":"What is the chemical symbol for water?","answer":"H2O","answer_aliases":["h₂o"]}
+{"case_id":"reg-005","question":"What is 9 multiplied by 7?","answer":"63","answer_aliases":["sixty-three"]}
+{"case_id":"reg-006","question":"In computing, what does CPU stand for?","answer":"Central Processing Unit","answer_aliases":["central processor unit"]}
+{"case_id":"reg-007","question":"Which ocean is the largest on Earth?","answer":"Pacific Ocean","answer_aliases":["the pacific"]}
+{"case_id":"reg-008","question":"How many continents are there on Earth?","answer":"7","answer_aliases":["seven"]}
+{"case_id":"reg-009","question":"What gas do plants primarily absorb from the atmosphere for photosynthesis?","answer":"Carbon dioxide","answer_aliases":["co2","CO2"]}
+{"case_id":"reg-010","question":"Who painted the Mona Lisa?","answer":"Leonardo da Vinci","answer_aliases":["da vinci","leonardo"]}
+{"case_id":"reg-011","question":"What is the freezing point of water at standard atmospheric pressure in degrees Celsius?","answer":"0","answer_aliases":["0 c","zero degrees celsius"]}
+{"case_id":"reg-012","question":"Which language is primarily spoken in Brazil?","answer":"Portuguese","answer_aliases":[]}
+{"case_id":"reg-013","question":"What is the square root of 144?","answer":"12","answer_aliases":["twelve"]}
+{"case_id":"reg-014","question":"Who proposed the theory of general relativity?","answer":"Albert Einstein","answer_aliases":["einstein"]}
+{"case_id":"reg-015","question":"What is the largest mammal on Earth?","answer":"Blue whale","answer_aliases":["the blue whale"]}
+{"case_id":"reg-016","question":"What is the primary language used for styling web pages?","answer":"CSS","answer_aliases":["cascading style sheets","cascading style sheet"]}
+{"case_id":"reg-017","question":"How many days are in a leap year?","answer":"366","answer_aliases":["three hundred sixty-six"]}
+{"case_id":"reg-018","question":"What is the currency of Japan?","answer":"Yen","answer_aliases":["japanese yen"]}
+{"case_id":"reg-019","question":"What force keeps planets in orbit around the sun?","answer":"Gravity","answer_aliases":["gravitational force"]}
+{"case_id":"reg-020","question":"Which element has atomic number 1?","answer":"Hydrogen","answer_aliases":["h"]}

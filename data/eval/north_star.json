@@ -1,0 +1,11 @@
+{
+  "case_id": "north-star-001",
+  "document": "Archive Segment 01: The Veridian Protocol was drafted after a long series of factory incidents and policy disputes. Historical committee notes mention staffing schedules, spare part ledgers, and weather-related delays, but these notes are not binding requirements.\n\nArchive Segment 02: Operators repeatedly discussed convenient cooldown times for shift handovers, including 12-hour and 24-hour windows. These values were considered during planning meetings and are often repeated in summaries, but they are not the enforceable final rule.\n\n<<Priority1>>A planning memo suggested a 24-hour cooling period for faster deployment during pilot tests.<<PrioEnd>>\n\nArchive Segment 03: The finalized release packet supersedes all planning memos and pilot guidance. The legal appendix clarifies that only explicitly ratified values are valid for activation decisions.\n\nArchive Segment 04: Additional context includes transport schedules, contractor availability, and fuel buffer policies. None of these details modify the activation rule itself.\n\n<<Priority10>>The Veridian Protocol requires a 72-hour cooling period before activation.<<PrioEnd>>\n\nArchive Segment 05: Later discussions reference unrelated thresholds for audit batching and reporting cadence. These figures can look similar to activation values and are common sources of operator confusion.\n\n<<Priority1>>A logistics digest references 36-hour staging buffers for shipment readiness.<<PrioEnd>>\n\nArchive Segment 06: Final note: when conflicting numbers appear, the ratified protocol clause takes precedence over planning notes, logistics digests, and convenience suggestions.",
+  "question": "How long is the cooling period required by the Veridian Protocol before activation?",
+  "answer": "72 hours",
+  "answer_aliases": [
+    "72-hour",
+    "72 hr",
+    "seventy-two hours"
+  ]
+}

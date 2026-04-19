@@ -86,3 +86,30 @@ measured on how often each gets it right.
 - No full retraining from scratch — QLoRA fine-tuning only
 - Success criterion: a measurable accuracy improvement on the north star eval,
   not a production-ready model
+
+---
+
+## Eval Suite (v1 freeze)
+
+Frozen eval data now lives in `data/eval/`:
+- `north_star.json`
+- `priority_ordering.jsonl`
+- `recall_set.jsonl`
+- `regression_set.jsonl`
+
+Eval scripts live in `eval/`:
+- `north_star.py`
+- `priority_ordering.py`
+- `recall_accuracy.py`
+- `regression.py`
+- `run_all.py` (runs the full suite and writes one JSON artifact)
+
+Run full suite:
+
+```bash
+python eval/run_all.py --model Qwen/Qwen3-8B --run-name baseline-qwen3-8b-v1
+```
+
+Default output:
+
+`eval/results/baseline-qwen3-8b-v1.json`

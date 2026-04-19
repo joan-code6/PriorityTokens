@@ -1,0 +1,432 @@
+0 · Setup
+
+1 · Eval first
+
+2 · Tokenizer
+
+3 · Dataset
+
+4 · Training
+
+5 · Eval
+
+Phase 0 — Environment & tooling
+One-time setup. Do this before anything else. Target: 1–2 hours, €0.
+
+Step 1 of 4
+Clone repo and set up Python environment
+Create a fresh venv. Pin library versions now — unsloth and transformers
+break each other often.
+python -m venv .venv && source .venv/bin/activate
+pip install torch transformers datasets peft trl unsloth
+pip install anthropic openai tiktoken  # for dataset gen
+pip freeze > requirements.txt
+Step 2 of 4
+Verify Qwen3-8B loads locally (CPU is fine)
+Just check the tokenizer and model config load without errors. You don't
+need a GPU for this.
+from transformers import AutoTokenizer, AutoConfig
+tok = AutoTokenizer.from_pretrained("Qwen/Qwen3-8B")
+cfg = AutoConfig.from_pretrained("Qwen/Qwen3-8B")
+print(tok.vocab_size, cfg.num_hidden_layers)  # 151936, 36
+
+Step 3 of 4
+Set up project folder structure
+Separate concerns early. You'll thank yourself during debugging.
+priority_tokens/
+├── tokenizer/        # embed init, add_special_tokens
+├── data/
+│   ├── raw/          # Claude API outputs (JSON)
+│   ├── processed/    # assembled training examples
+│   └── eval/         # frozen eval set (write first)
+├── train/            # training config + scripts
+├── eval/             # eval scripts
+└── outputs/          # model checkpoints
+Step 4 of 4
+Set up RunPod account but don't start GPU yet
+Create account, add €60 credit, bookmark RTX 4090 pod template. Don't
+pay for GPU time until you're ready to train.
+# RTX 4090 on RunPod: ~0.75 €/hr
+# Template: runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel
+# Volume: 50GB network volume (persists between sessions)
+# DO NOT start pod until Phase 4
+Phase 1 — Write the eval suite (before data)
+Freeze these files before generating any training data. This prevents
+unconscious overfitting.
+Step 1 of 5
+Write and freeze the north star eval document
+One ~5k-token document. A P10 fact buried at token ~3000. P1 filler
+everywhere else. Save to data/eval/north_star.json and don't touch it again.
+# north_star.json structure
+{
+  "document": "...~5k tokens of filler...
+<<Priority10>>The Veridian Protocol requires a 72-hour
+cooling period before activation.<<PrioEnd>>
+...~2k more tokens of filler...",
+  "question": "How long is the cooling period required
+               by the Veridian Protocol?",
+  "answer": "72 hours",
+  "p10_token_position": 3021,
+  "doc_token_length": 5184
+}
+Step 2 of 5
+Write eval script: priority ordering test
+3 documents, same question. Fact tagged P10 in doc A, P5 in doc B, P1 in
+doc C. Run base model + fine-tuned model on all three. The fine-tuned
+model should return the P10 answer most confidently.
+# eval/priority_ordering.py
+# Input: 3 variants of same doc with fact at P10/P5/P1
+# Metric: Does answer match the high-priority variant?
+# Score: % of questions where priority order is respected
+# Target: >80% on fine-tuned vs ~33% random baseline
+Step 3 of 5
+Write eval script: recall accuracy
+10 documents, each with one P10 fact buried at a random position.
+Question requires that fact. Compare fine-tuned vs base model accuracy.
+# eval/recall_accuracy.py
+# Metric: exact_match or contains(answer, gold_fact)
+# 10 documents × 1 question each = 10 data points
+# Run on: base Qwen3-8B, fine-tuned model, no-tags baseline
+Step 4 of 5
+Write eval script: regression check
+Use 20 questions from MMLU or TriviaQA (no priority tags). Verify fine-
+tuned model doesn't drop more than 3 points vs base. This is your safety
+net.
+# eval/regression.py
+# Use 20 random MMLU questions (5-shot, no priority tags)
+# Acceptable regression: <= 3 points accuracy drop
+# If > 3 points drop after training: LoRA rank was too high
+# or training data had format leakage
+Step 5 of 5
+Commit eval/ folder as frozen
+Git commit with message 'freeze eval suite — do not modify'. If you need
+to change the eval later, that's a new experiment, not a fix.
+git add data/eval/ eval/
+git commit -m "freeze eval suite — do not modify"
+git tag eval-v1
+Phase 2 — Tokenizer extension + embed init
+Add the 11 special tokens and initialize their embeddings. Pure CPU
+work, ~30 minutes.
+Step 1 of 3
+Add special tokens to the Qwen3 tokenizer
+add_special_tokens() adds them to vocab and updates the fast BPE
+tokenizer. Verify round-trip encoding works.
+from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("Qwen/Qwen3-8B")
+
+new_tokens = [f"<<Priority{i}>>" for i in range(1, 11)] + ["<<PrioEnd>>"]
+tok.add_special_tokens({"additional_special_tokens": new_tokens})
+
+# Verify: these should each be single tokens now
+for t in new_tokens:
+    ids = tok.encode(t, add_special_tokens=False)
+    assert len(ids) == 1, f"{t} is not a single token: {ids}"
+
+tok.save_pretrained("tokenizer/qwen3-8b-prio")
+Step 2 of 3
+Resize model embeddings and initialize from nearby token
+Copy embedding vector from <|im_start|> — a special token the model
+already understands. Do NOT use random init.
+from transformers import AutoModelForCausalLM
+import torch
+
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen3-8B",
+                                              torch_dtype=torch.float32)
+model.resize_token_embeddings(len(tok))
+
+# Find <|im_start|> id in original tokenizer
+im_start_id = tok.convert_tokens_to_ids("<|im_start|>")
+src_embed = model.model.embed_tokens.weight[im_start_id].clone()
+
+# Initialize all 11 new tokens from that embedding
+for token in new_tokens:
+    new_id = tok.convert_tokens_to_ids(token)
+    with torch.no_grad():
+        model.model.embed_tokens.weight[new_id] = src_embed.clone()
+
+model.save_pretrained("tokenizer/qwen3-8b-prio")
+Step 3 of 3
+Verify: new tokens survive a forward pass
+Quick sanity check. The model shouldn't crash when it sees a priority
+token in input.
+text = "<<Priority10>>This is critical.<<PrioEnd>> Other text."
+inputs = tok(text, return_tensors="pt")
+with torch.no_grad():
+    out = model(**inputs, labels=inputs["input_ids"])
+print("Loss:", out.loss.item())  # should be a normal number, not nan
+Phase 3 — Dataset generation
+Generate ~1,500 training examples using Claude API (Haiku). Estimated
+cost: €2–5.
+Step 1 of 5
+Write the document component generator
+Call Haiku to generate filler paragraphs and fact pairs separately.
+Assemble in Python — never ask Claude to generate the whole tagged
+document at once.
+# data/generate.py — component approach
+import anthropic, random, json
+
+client = anthropic.Anthropic()
+
+def gen_filler(topic, n_paragraphs=4) -> str:
+    r = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=600,
+        messages=[{"role":"user","content":
+            f"Write {n_paragraphs} paragraphs about {topic}. "
+            "Use specific but fictional names, numbers, dates. "
+            "Plain prose, no headers."}]
+    )
+    return r.content[0].text
+
+def gen_fact_pair(topic) -> dict:
+    r = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=200,
+        messages=[{"role":"user","content":
+            f"For topic: {topic}. Give me:
+"
+            "- fact_a: one sentence with a specific measurable value
+"
+            "- fact_b: same sentence but a DIFFERENT value (plausible)
+"
+            "- question: a question whose answer is the value
+"
+            "Respond as JSON only."}]
+    )
+    return json.loads(r.content[0].text)
+Step 2 of 5
+Write the document assembler
+Place facts at randomized positions. Track positions in metadata.
+Enforce minimum 500-token gap between P10 and P5 spans.
+def assemble_contrastive_pair(topic):
+    filler_chunks = [gen_filler(topic) for _ in range(5)]
+    pair = gen_fact_pair(topic)
+
+    # Randomize positions — never let P10 always be last
+    positions = random.sample(range(5), 2)
+    p10_pos, p5_pos = sorted(positions, key=lambda _: random.random())
+
+    chunks = filler_chunks.copy()
+    chunks[p10_pos] = f"<<Priority10>>{pair['fact_a']}<<PrioEnd>> " + chunks[p10_pos]
+    chunks[p5_pos]  = f"<<Priority5>>{pair['fact_b']}<<PrioEnd>> " + chunks[p5_pos]
+    doc = "
+
+".join(chunks)
+
+    return {
+        "variant_a": {"messages": build_msgs(doc, pair["question"], pair["fact_a"]),
+                      "metadata": {"type":"contrastive","p10_pos":p10_pos,"pair_id":pair_id}},
+        "variant_b": {"messages": build_msgs(swap_priorities(doc), pair["question"], pair["fact_b"]),
+                      "metadata": {"type":"contrastive","p10_pos":p5_pos,"pair_id":pair_id}},
+    }
+Step 3 of 5
+Generate across 10 domains with target counts
+Vary domains so the model can't learn domain-specific shortcuts.
+DOMAINS = [
+    "industrial chemistry", "fictional archaeology", "marine biology",
+    "railway engineering", "medieval economics", "pharmaceutical trials",
+    "satellite communications", "agricultural hydrology",
+    "fictional politics", "materials science"
+]
+
+TARGET = {
+    "contrastive": 600,   # 40% — pairs × 2 variants = 600 total
+    "positive":    525,   # 35%
+    "adversarial": 225,   # 15%
+    "instruction": 150,   # 10%
+}
+# Total: 1500 examples across 10 domains
+Step 4 of 5
+Validate the generated dataset
+Run these checks before training. Catching bad data here saves €40+ in
+GPU time.
+# data/validate.py
+import json, collections
+
+data = [json.loads(l) for l in open("data/processed/train.jsonl")]
+
+# 1. Check P10 position distribution is flat (not always at end)
+positions = [d["metadata"]["p10_pos"] for d in data if "p10_pos" in d["metadata"]]
+counts = collections.Counter(positions)
+print("Position distribution:", dict(counts))
+# Should be roughly uniform — not 80% in one bucket
+
+# 2. Check no example has the answer in the question
+for d in data:
+    q = d["messages"][0]["content"]
+    a = d["messages"][1]["content"]
+    assert a.strip() not in q[:50], f"Answer leaked into question: {a}"
+
+# 3. Check all priority tags are well-formed
+for d in data:
+    doc = d["messages"][0]["content"]
+    assert doc.count("<<PrioEnd>>") >= 1
+    assert "<<Priority" in doc
+Step 5 of 5
+Check position-priority correlation (critical)
+Plot or print the correlation between P10 token position and whether the
+model should prefer it. If P10 is always in position 3 of 5 chunks, the
+model learns position, not priority.
+# If this number is > 0.15, regenerate with better randomization
+import numpy as np
+p10_positions = [d["metadata"]["p10_pos"] for d in contrastive_pairs]
+p5_positions  = [d["metadata"]["p5_pos"]  for d in contrastive_pairs]
+corr = np.corrcoef(p10_positions, range(len(p10_positions)))[0,1]
+print(f"Position-index correlation: {corr:.3f}  (want < 0.15)")
+Phase 4 — QLoRA SFT on RunPod
+Start the GPU pod. Estimated time: 4–6 hrs. Estimated cost: €3–5.
+Step 1 of 5
+Start RunPod RTX 4090 pod
+Use the network volume you created in Phase 0. Upload your repo first
+using rsync or the RunPod file manager.
+# From local machine:
+rsync -avz --exclude='.git' --exclude='__pycache__' \
+  ./priority_tokens/ runpod@<pod-ip>:/workspace/priority_tokens/
+
+# On RunPod pod:
+cd /workspace/priority_tokens
+pip install -r requirements.txt
+# Verify GPU is visible:
+python -c "import torch; print(torch.cuda.get_device_name(0))"
+Step 2 of 5
+Configure QLoRA training with Unsloth
+Start conservative. LoRA rank=16, alpha=32. You can increase rank if
+behavior doesn't emerge, but start low to protect budget.
+# train/config.py
+from unsloth import FastLanguageModel
+
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name = "tokenizer/qwen3-8b-prio",  # your extended tokenizer
+    max_seq_length = 8192,
+    dtype = None,  # auto-detect
+    load_in_4bit = True,
+)
+
+model = FastLanguageModel.get_peft_model(
+    model,
+    r = 16,           # LoRA rank — start here
+    target_modules = ["q_proj","k_proj","v_proj","o_proj",
+                       "gate_proj","up_proj","down_proj"],
+    lora_alpha = 32,
+    lora_dropout = 0.05,
+    bias = "none",
+    use_gradient_checkpointing = True,
+)
+# IMPORTANT: also train the new token embeddings
+# Unsloth may freeze embeddings by default — verify they're unfrozen
+model.model.embed_tokens.weight.requires_grad_(True)
+Step 3 of 5
+Run a 50-step smoke test before full training
+Costs ~5 minutes. Verify loss goes down, no NaN, no OOM. Then cancel and
+start the real run.
+# In TrainingArguments, add:
+max_steps = 50
+# Check output: loss should drop from ~2.5 to ~1.8 in 50 steps
+# If loss is NaN: check for empty examples or bad tokenization
+# If OOM: reduce per_device_train_batch_size from 2 to 1
+Step 4 of 5
+Full training run
+3 epochs on 1,500 examples. With gradient accumulation this is ~2,250
+gradient steps. Expect 4–6 hours on an RTX 4090.
+from trl import SFTTrainer
+from transformers import TrainingArguments
+
+trainer = SFTTrainer(
+    model = model,
+    tokenizer = tokenizer,
+    train_dataset = dataset,
+    dataset_text_field = "text",
+    max_seq_length = 8192,
+    args = TrainingArguments(
+        per_device_train_batch_size = 2,
+        gradient_accumulation_steps = 4,  # effective batch = 8
+        num_train_epochs = 3,
+        learning_rate = 2e-4,
+        fp16 = True,
+        logging_steps = 25,
+        save_steps = 200,
+        output_dir = "outputs/run-01",
+        warmup_ratio = 0.05,
+        lr_scheduler_type = "cosine",
+    ),
+)
+trainer.train()
+Step 5 of 5
+Save and download checkpoint, stop pod
+Stop the pod immediately after downloading. Don't leave it running while
+you eval locally.
+# On RunPod:
+model.save_pretrained("outputs/run-01/final")
+tokenizer.save_pretrained("outputs/run-01/final")
+
+# rsync back to local:
+rsync -avz runpod@<pod-ip>:/workspace/priority_tokens/outputs/ ./outputs/
+
+# STOP THE POD — RunPod dashboard or:
+# API: DELETE pod. Don't just close the browser tab.
+Phase 5 — Run the eval suite
+Run locally (CPU is fine for eval). Compare fine-tuned vs base on all
+four metrics.
+Step 1 of 5
+Run north star eval
+The single most important test. Fine-tuned model should answer correctly
+from the buried P10 fact. Base model will likely miss it or return a
+lower-priority answer.
+python eval/north_star.py \
+  --model outputs/run-01/final \
+  --baseline Qwen/Qwen3-8B \
+  --doc data/eval/north_star.json
+
+# Expected output:
+# Base model:       "The cooling period is 24 hours."  ← wrong (P1 distractor)
+# Fine-tuned model: "72 hours"                          ← correct (P10 fact)
+Step 2 of 5
+Run priority ordering test
+Across 10 contrastive triples (P10/P5/P1 variants), does the fine-tuned
+model return the P10 answer most often? Target: >80%.
+python eval/priority_ordering.py \
+  --model outputs/run-01/final --baseline Qwen/Qwen3-8B
+
+# Score: % of questions where P10 answer ranked above P5 above P1
+# If < 60%: the model hasn't learned the priority ordering — 
+#   check your contrastive pairs for position correlation
+Step 3 of 5
+Run recall accuracy test
+Fine-tuned model on 10 long-context recall questions. Compare to base
+model accuracy.
+python eval/recall_accuracy.py \
+  --model outputs/run-01/final --baseline Qwen/Qwen3-8B
+
+# Metric: exact_match on short-answer questions
+# Target: fine-tuned model beats baseline by >= 20 points
+# If no improvement: add more adversarial training examples
+Step 4 of 5
+Run regression check
+20 MMLU questions without any priority tags. Fine-tuned model should not
+drop more than 3 points vs base.
+python eval/regression.py \
+  --model outputs/run-01/final --baseline Qwen/Qwen3-8B
+
+# If regression > 3 points:
+#   - Reduce LoRA rank from 16 to 8
+#   - Add more 'plain text' examples (no tags) to training data
+#   - Re-run training
+Step 5 of 5
+Interpret results and decide next step
+Three possible outcomes:
+# OUTCOME A — It works (priority ordering >80%, recall improvement >20pts)
+#   Next: expand from binary P5/P10 to full P1–P10 scale
+
+# OUTCOME B — Partial (>50% ordering, some recall improvement)
+#   Next: add 500 more contrastive pairs and retrain for 1 more epoch
+
+# OUTCOME C — Doesn't work (<50% ordering)
+#   Diagnose: check position correlation in training data
+#   Check: are the new token embeddings actually being updated?
+#   Check: is loss on contrastive examples actually lower than random?
+← Previous
+
+Next →
+
+<#>
