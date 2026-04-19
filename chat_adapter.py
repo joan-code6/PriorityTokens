@@ -27,6 +27,7 @@ def pick_compute_dtype() -> torch.dtype:
         return torch.bfloat16
     return torch.float16
 
+#Idk yet so ima 
 
 def build_quantization_config(disable_4bit: bool) -> BitsAndBytesConfig | None:
     if disable_4bit or not torch.cuda.is_available():

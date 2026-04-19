@@ -5,3 +5,4 @@ When working in this repo:
 - treat `Roadmap.md` as the execution source of truth
 - update `Roadmap.md` whenever you materially change implementation status, deliverables, results, blockers, or next steps
 - keep documentation aligned with the actual repo state rather than stale concept-stage wording
+- `all-you-need-to-know.md` has all informations about this project, but its long

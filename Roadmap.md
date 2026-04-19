@@ -238,23 +238,30 @@ Build the proof, not just the model.
 
 ### Status
 
-Not complete.
+Implemented in code, baseline run pending local execution.
 
-### Work required
+### Implemented assets
 
-- Create a dedicated evaluation script for base vs fine-tuned comparison.
-- Build a fixed benchmark set that is not reused for training.
-- Separate evaluation into at least three slices: recall, instruction override, and adversarial noise resistance.
-- Track exact-match accuracy and per-slice accuracy.
-- Include position-based slicing: early, middle, late placement of `Priority10`.
-- Include ablations: base model, fine-tuned model, and optionally fine-tuned model with tags removed.
+- Frozen eval datasets under `data/eval/`:
+  - `north_star.json`
+  - `priority_ordering.jsonl`
+  - `recall_set.jsonl`
+  - `regression_set.jsonl`
+- Eval scripts under `eval/`:
+  - `north_star.py`
+  - `priority_ordering.py`
+  - `recall_accuracy.py`
+  - `regression.py`
+  - `run_all.py`
+  - `common.py`
+- Structured result output path: `eval/results/<run_name>.json`
 
-### Required files
+### Remaining work
 
-- `eval/benchmark.jsonl`
-- `eval/run_eval.py`
-- `eval/results/`
-- `eval/README.md`
+- Run baseline artifact generation locally:
+  - `python eval/run_all.py --model Qwen/Qwen3-8B --run-name baseline-qwen3-8b-v1`
+- Commit and tag eval freeze after baseline artifact is written.
+- (Optional hardening) Add explicit eval README documenting metric interpretation.
 
 ### Acceptance criteria
 
@@ -307,12 +314,12 @@ Do not prioritize this phase until Phase 5 produces a clear positive signal.
 
 These are the concrete next steps the repo should take now, in order:
 
-1. Add a saved validation report for the existing dataset and decide whether to keep or regenerate it.
-2. Add a tokenizer smoke test to verify the 11 special tokens behave correctly.
-3. Freeze the v1 evaluation spec in writing.
-4. Create an `eval/` harness for base-vs-adapter comparison.
-5. Run one canonical non-smoke training job and record the manifest.
-6. Update the website progress section to reflect the real repo state.
+1. Run and save the baseline eval artifact at `eval/results/baseline-qwen3-8b-v1.json`.
+2. Commit `data/eval/`, `eval/`, and related docs; create tag `eval-v1`.
+3. Execute Phase 2 tokenizer validation (save/load and token-ID stability checks).
+4. Run one canonical non-smoke training job and record the manifest.
+5. Compare base vs tuned model on the frozen eval suite and publish results.
+6. Update website progress copy to match implemented repo state.
 
 ## Risks And Failure Modes
 
