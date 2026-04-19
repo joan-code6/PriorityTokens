@@ -1,4 +1,3 @@
-
 # I am actively working on replacing this AI Version with my own but it takes time!
 ## For more information see https://prioritytokens.arg-server.de/
 [<img width="1920" height="967" alt="grafik" src="https://github.com/user-attachments/assets/25e393aa-f598-40f8-8c2a-a8341324f928" />
@@ -113,3 +112,27 @@ python eval/run_all.py --model Qwen/Qwen3-8B --run-name baseline-qwen3-8b-v1
 Default output:
 
 `eval/results/baseline-qwen3-8b-v1.json`
+
+## Local Chat With A Trained Adapter
+
+After training, you can chat with your adapter locally:
+
+```powershell
+.\.venv311\Scripts\python chat_adapter.py `
+  --model-name Qwen/Qwen2.5-1.5B-Instruct `
+  --adapter-path artifacts\qwen25-1_5b-prioritytokens-test
+```
+
+CLI commands:
+
+- `/reset` clears chat history
+- `/exit` or `/quit` exits
+
+Optional simple desktop GUI:
+
+```powershell
+.\.venv311\Scripts\python chat_adapter.py `
+  --model-name Qwen/Qwen2.5-1.5B-Instruct `
+  --adapter-path artifacts\qwen25-1_5b-prioritytokens-test `
+  --gui
+```
