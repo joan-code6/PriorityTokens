@@ -30,7 +30,7 @@ export default function App() {
               </p>
               <p>
                 Please do not rate this project lower simply because of these circumstances; I ask that you treat all
-                projects equally. In the past, I have received lower marks because voters felt they didn&apos;t fully
+                projects equally. In the past, I have received lower marks because voters felt they didn’t fully
                 understand the concept or see a live demo.
               </p>
               <p>Thank you for your time!</p>
