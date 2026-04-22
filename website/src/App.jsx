@@ -34,12 +34,16 @@ export default function App() {
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-white">
       {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setShowPopup(false)}
+        >
           <div
             className="w-full max-w-2xl rounded-2xl border border-white/20 bg-[#101010] p-6 shadow-2xl"
             role="dialog"
             aria-labelledby="voter-popup-title"
             aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
           >
             <h2 id="voter-popup-title" className="text-2xl font-semibold">
               Hello voters!
@@ -61,6 +65,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setShowPopup(false)}
+              aria-label="Close voter notice dialog"
               className="mt-6 rounded-full bg-white px-5 py-2 text-sm font-medium text-black transition hover:bg-zinc-200"
             >
               Close
