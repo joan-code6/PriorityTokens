@@ -16,12 +16,34 @@ export default function App() {
     document.documentElement.classList.add('dark')
   }, [])
 
+  useEffect(() => {
+    if (!showPopup) {
+      return undefined
+    }
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowPopup(false)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [showPopup])
+
   return (
     <div className="min-h-[100dvh] bg-[#050505] text-white">
       {showPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-white/20 bg-[#101010] p-6 shadow-2xl">
-            <h2 className="text-2xl font-semibold">Hello voters!</h2>
+          <div
+            className="w-full max-w-2xl rounded-2xl border border-white/20 bg-[#101010] p-6 shadow-2xl"
+            role="dialog"
+            aria-labelledby="voter-popup-title"
+            aria-modal="true"
+          >
+            <h2 id="voter-popup-title" className="text-2xl font-semibold">
+              Hello voters!
+            </h2>
             <div className="mt-4 space-y-4 text-sm leading-relaxed text-zinc-200 sm:text-base">
               <p>
                 This project is a bit different from what you might be used to. I am currently fine-tuning LLMs to
