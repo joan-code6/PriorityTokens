@@ -15,7 +15,7 @@ Based on the repository state on 2026-04-17:
 - A generated dataset already exists at `Dataset_gen/dataset.jsonl`.
 - A QLoRA training script exists at `train_qlora.py`.
 - A smoke-training artifact exists at `artifacts/smoke-qwen3-8b/checkpoint-1`.
-- The website progress copy is stale relative to the codebase and should eventually be updated.
+- The website now includes a startup popup explaining the limited demo scope to voters; broader progress copy is still stale relative to the codebase.
 
 Observed repo facts:
 
@@ -277,7 +277,7 @@ Package the experiment so other people can inspect, rerun, and critique it.
 
 ### Status
 
-Not started.
+In progress.
 
 ### Deliverables
 
@@ -285,7 +285,7 @@ Not started.
 - dataset card
 - evaluation summary with charts or tables
 - concise “how to use Priority Tokens” documentation
-- website update reflecting real status rather than concept-stage copy
+- website update reflecting real status rather than concept-stage copy (partially addressed by the startup voter-context popup)
 
 ### Acceptance criteria
 
